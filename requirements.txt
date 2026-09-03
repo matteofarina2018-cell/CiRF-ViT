@@ -1,0 +1,9 @@
+# Core (everything except the GP baseline)
+numpy>=1.24
+torch>=2.0
+matplotlib>=3.7
+pillow>=10.0
+scipy>=1.10
+
+# GP baseline only (models/gp): the sparse variational GP of Goldin et al.
+gpytorch>=1.11

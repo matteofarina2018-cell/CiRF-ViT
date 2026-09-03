@@ -1,0 +1,99 @@
+{
+  "_comment": "Numerical defaults for the GP baseline. Only the 'model' and 'early_stopping' blocks are read by the code (models/gp/_constants.py); the rest documents the reference implementation's defaults and is NOT what the paper used. The GP settings behind the published numbers are models/gp/train.py:DEFAULT_CFG (paper Table 3).",
+  "run": {
+    "mode": "default_gpy",
+    "device": "cuda",
+    "dtype": "float32"
+  },
+  "kernel": {
+    "_comment_type": "arc_cosine | arc_sine | rbf",
+    "type": "arc_cosine",
+    "sigma_0": 1.0,
+    "Amp": 1.0,
+    "beta": 0.1,
+    "rho": 0.1,
+    "_comment_rf_init": "sta = RF center from natural images STA (smoothed argmax). ground_truth = from white noise/checkerboard ellipse fits (datasets/rf_centers_ground_truth.npz). center = image center (0,0).",
+    "rf_init": "ground_truth",
+    "eps_0x": 0.0,
+    "eps_0y": 0.0,
+    "gradient_mode": "autograd",
+    "use_mask": true,
+    "bound_rf_center": true,
+    "n_sigma_rf_bounds": 3.0,
+    "_comment_lengthscale": "only used when type=rbf",
+    "lengthscale": 100.0
+  },
+  "link_function": {
+    "A_init": 0.01,
+    "lambda0_init": 1.0
+  },
+  "training": {
+    "n_iterations": 50,
+    "n_estep": 10,
+    "n_fstep": 10,
+    "n_mstep": 10,
+    "lr": 0.1,
+    "optimizer": "lbfgs"
+  },
+  "early_stopping": {
+    "_comment_es_metric": "Only 'elbo' or 'none' are valid: under the interleaved F-step the transient in A makes val_ll / val_r / val_rho too noisy to stop on.",
+    "enabled": true,
+    "patience": 15,
+    "min_delta_rel": 0.001,
+    "min_iterations": 10,
+    "restore_best": true,
+    "es_metric": "elbo"
+  },
+  "model": {
+    "use_cache": true,
+    "jitter": 0.0001,
+    "cholesky_max_tries": 3,
+    "eigval_tol": 0.0001,
+    "gpy_lbfgs_max_iter": 20,
+    "lambda_var_clamp": 1e-06,
+    "f_mean_max_threshold": 500,
+    "f_mean_mean_threshold": 100
+  },
+  "data": {
+    "_comment_n_val_split": "0 = no validation carving; ELBO-based early stopping does not need val data. Set >0 to enable diagnostic val_log_lik / val_r / val_rho curves, which are NOT used for early stopping.",
+    "path": "datasets/PNAS_108x108_original.npz",
+    "n_train": 500,
+    "n_val_split": 0,
+    "n_px_side": null,
+    "cellid": 8,
+    "ntilde": 100,
+    "seed": 42
+  },
+  "inducing": {
+    "selection_method": "random",
+    "n_candidates": null,
+    "n_samples_sta": null
+  },
+  "utility": {
+    "n_mc_samples": 200,
+    "r_max": 100,
+    "f_max": 100,
+    "adaptive_r_max": false,
+    "adaptive_safety_k": 3.0,
+    "adaptive_max_rmax": 10000,
+    "adaptive_min_rmax": 200
+  },
+  "active_learning": {
+    "_comment": "Settings of the authors' closed-loop experiments, kept for reference. Nothing in this repository reads them.",
+    "n_active_iterations": 250,
+    "phase2_n_iterations": 5,
+    "phase2_n_estep": 10,
+    "phase2_n_fstep": 10,
+    "phase2_n_mstep": 10,
+    "phase2_lr": 0.1,
+    "phase2_early_stop": false,
+    "phase2_print_every": 999,
+    "phase2_verbose": false,
+    "strategy": "argmax",
+    "mode": "vargp_direct",
+    "phase1_M": 50,
+    "output_dir_default": "results/active_loop",
+    "_comment_checkpoint_pool_sum_tolerance": "Integrity-check tolerance compared against X_pool.sum() to catch wrong-dataset bugs. The pipeline derives it from the pool instead (cirf.data.gp_pool_tolerance); this value is the fixed fallback the reference implementation used.",
+    "checkpoint_pool_sum_tolerance": 0.001
+  }
+}

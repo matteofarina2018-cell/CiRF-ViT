@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cirf-vit"
+version = "1.0.0"
+description = "CiRF-ViT: a vision transformer with a per-neuron receptive-field crop, and its benchmark suite"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Matteo Farina", email = "m.farina.cv@gmail.com" },
+    { name = "Pietro Zamberlan" },
+    { name = "Arno Onken" },
+    { name = "Ulisse Ferrari" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "numpy>=1.24",
+    "torch>=2.0",
+    "matplotlib>=3.7",
+    "pillow>=10.0",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+gp = ["gpytorch>=1.11"]
+
+[tool.setuptools]
+packages = ["cirf", "models", "models.transformer", "models.cnn", "models.gp", "models.ln"]
+
+[tool.setuptools.package-data]
+"models.gp" = ["*.json"]

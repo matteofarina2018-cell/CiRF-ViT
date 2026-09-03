@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software and the paper below."
+title: "CiRF-ViT: a vision transformer with a per-neuron receptive-field crop"
+type: software
+license: MIT
+authors:
+  - family-names: Farina
+    given-names: Matteo
+    affiliation: "Institut de la Vision, Sorbonne Universite, INSERM, CNRS"
+  - family-names: Zamberlan
+    given-names: Pietro
+    affiliation: "Institut de la Vision, Sorbonne Universite, INSERM, CNRS"
+  - family-names: Onken
+    given-names: Arno
+    affiliation: "School of Informatics, University of Edinburgh"
+  - family-names: Ferrari
+    given-names: Ulisse
+    affiliation: "Institut de la Vision, Sorbonne Universite, INSERM, CNRS"
+preferred-citation:
+  type: article
+  title: "Biologically grounded locality priors close the data gap for vision transformers in neural prediction"
+  year: 2026
+  notes: "Preprint; under review at Transactions on Machine Learning Research"
+  authors:
+    - family-names: Farina
+      given-names: Matteo
+    - family-names: Zamberlan
+      given-names: Pietro
+    - family-names: Onken
+      given-names: Arno
+    - family-names: Ferrari
+      given-names: Ulisse
