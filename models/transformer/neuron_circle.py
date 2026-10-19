@@ -48,6 +48,11 @@ class NeuronCircle(nn.Module):
         self.img_h     = img_h
         self.img_w     = img_w
         self.crop_half = crop_half
+        # grid_sample mode, and how pixel offsets are normalised: 'half'
+        # divides by W/2 (the default), 'corners' by (W-1)/2, which
+        # is the convention of align_corners=True. Set by extra_variants.
+        self.mode = 'bilinear'
+        self.offset_norm = 'half'
 
         self.cx = nn.Parameter(torch.tensor(centers_x, dtype=torch.float32))
         self.cy = nn.Parameter(torch.tensor(centers_y, dtype=torch.float32))
@@ -93,8 +98,12 @@ class NeuronCircle(nn.Module):
         cx_norm = self._to_normalized(self.cx, W)
         cy_norm = self._to_normalized(self.cy, H)
 
-        off_x_norm = self.circle_off_x / (W / 2.0)
-        off_y_norm = self.circle_off_y / (H / 2.0)
+        if self.offset_norm == 'corners':
+            off_x_norm = self.circle_off_x / ((W - 1) / 2.0)
+            off_y_norm = self.circle_off_y / ((H - 1) / 2.0)
+        else:
+            off_x_norm = self.circle_off_x / (W / 2.0)
+            off_y_norm = self.circle_off_y / (H / 2.0)
 
         grid_x = cx_norm.view(N, 1) + off_x_norm.view(1, T)          # [N, T]
         grid_y = cy_norm.view(N, 1) + off_y_norm.view(1, T)          # [N, T]
@@ -102,7 +111,7 @@ class NeuronCircle(nn.Module):
         grid   = grid.unsqueeze(0).expand(B, -1, -1, -1)             # [B, N, T, 2]
 
         feat = F.grid_sample(x, grid,
-                             mode='bilinear', padding_mode='border',
+                             mode=self.mode, padding_mode='border',
                              align_corners=True)                     # [B, C, N, T]
         feat = feat.permute(0, 2, 3, 1)                              # [B, N, T, C]
 

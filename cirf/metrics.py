@@ -59,6 +59,19 @@ def adjusted_r2_per_neuron(y_pred, y_true_repeated):
     return out
 
 
+def cc_norm_per_neuron(y_pred, y_true_repeated):
+    """(N,) noise-corrected correlation: the EV with sqrt(c_eo).
+
+    mean(corr(pred, even), corr(pred, odd)) / sqrt(c_eo), which an oracle
+    scores 1 on (Schoppe et al., 2016). Equals sqrt(adjR2) where the mean
+    correlation is positive.
+    """
+    out = np.zeros(y_pred.shape[1])
+    for i, c_eo, c_pe, c_po in _paired_correlations(y_pred, y_true_repeated):
+        out[i] = max((c_pe + c_po) / 2.0 / np.sqrt(c_eo), 0.0)
+    return out
+
+
 METRIC_FNS = {'ev': explained_variance_per_neuron,
               'adj_r2': adjusted_r2_per_neuron}
 METRIC_TITLES = {'ev': 'Explained Variance', 'adj_r2': 'Adjusted R²',

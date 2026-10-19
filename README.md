@@ -105,6 +105,9 @@ cirf/                the library: data, metrics, LSTA, benchmarks, plotting
 models/              one package per architecture, each with config/build/train
   transformer/       CiRF-ViT: tokeniser, circular crop, RoPE 2D, readout
     variants.py      the ablations and the ViT-P focal-bias comparison
+    extra_variants.py  further ablations: convolutional core, crop centres,
+                     radius, sampling
+  pretrained/        the V1T core (Li et al., 2023), for the pretrained-core comparison
   cnn/               shared convolutional core + per-neuron readout
   gp/                sparse variational GP per neuron (Goldin et al., 2023)
   ln/                one linear–nonlinear cascade per neuron
@@ -218,7 +221,11 @@ training-run noise or systematic (`scripts/gradient_reproducibility.py`).
 | `train.py` | train one model or all four, K-fold (`--folds`, `--n-folds`) |
 | `evaluate.py` | score every fold into `fold_K/eval/eval_data.npz` and aggregate |
 | `fraction_study.py` | the data-efficiency sweep (the expensive one), one run per fold |
-| `ablation.py` | remove one component at a time, one run per fold; also the ViT-P focal-bias variant and the two controls that separate the crop's effect on the attention from its effect on the readout (global attention with the circle in the readout only; the CNN with the circle on its readout) |
+| `ablation.py` | remove one component at a time, one run per fold; also the ViT-P focal-bias variant and the two controls that separate the crop's effect on the attention from its effect on the readout (global attention with the circle in the readout only; the CNN with the circle on its readout); `--variants` also takes the further ablations of `extra_variants.py` |
+| `ablation_posthoc.py` | LSTA agreement and trained crop centres of every fold of an ablation variant |
+| `fraction_study_plain_vit.py` | the data-efficiency sweep of the plain ViT (CiRF-ViT without the crop) |
+| `score_fractions.py` | test metrics of every data-efficiency run that has none yet |
+| `pretrained_cores.py` | pretrained ViT cores (supervised ImageNet, DINO, V1T), frozen or fine-tuned, at every data fraction |
 | `crop_vs_nocrop.py` | training dynamics with and without the crop, on one fold (`--fold`) |
 | `lsta_cutoff.py` | derive the band limit from the experimental maps |
 | `band_power.py` | how much gradient power the band limit removes, per model |
@@ -315,7 +322,9 @@ belong to Goldin et al. and are cited below.
   author = {Farina, Matteo and Zamberlan, Pietro and Onken, Arno and
             Ferrari, Ulisse},
   year   = {2026},
-  note   = {Preprint; under review at Transactions on Machine Learning Research}
+  journal = {bioRxiv},
+  doi    = {10.64898/2026.09.03.749141},
+  note   = {Preprint}
 }
 ```
 

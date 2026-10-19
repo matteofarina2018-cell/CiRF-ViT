@@ -313,6 +313,8 @@ VARIANT_LABELS = {
     'no_rope': 'no RoPE', 'no_attn': 'no attention', 'focal': 'ViT-P',
     'readout_crop': 'global attention\ncrop in readout', 'cnn_crop': 'CNN\ncrop in readout',
 }
+from .extra_variants import EXTRA_LABELS as _EL  # noqa: E402
+VARIANT_LABELS.update(_EL)
 
 
 def build_variant(name, cfg, ds=None, device='cpu'):
@@ -323,6 +325,9 @@ def build_variant(name, cfg, ds=None, device='cpu'):
     """
     if name == 'full':
         return build_model(cfg, ds, device)
+    from .extra_variants import EXTRA_VARIANTS, build_extra_variant
+    if name in EXTRA_VARIANTS:
+        return build_extra_variant(name, cfg, ds, device)
     if name == 'no_crop':
         return build_nocrop_model(cfg, ds, device)
     if name == 'readout_crop':

@@ -20,7 +20,9 @@ preferred-citation:
   type: article
   title: "Biologically grounded locality priors close the data gap for vision transformers in neural prediction"
   year: 2026
-  notes: "Preprint; under review at Transactions on Machine Learning Research"
+  journal: "bioRxiv"
+  doi: "10.64898/2026.09.03.749141"
+  notes: "Preprint"
   authors:
     - family-names: Farina
       given-names: Matteo

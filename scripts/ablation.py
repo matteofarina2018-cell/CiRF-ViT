@@ -19,6 +19,9 @@ Variants (see models/transformer/variants.py):
                  the constraint without the transformer
     full         the model itself, if you want it retrained alongside
 
+Further variants (convolutional core, crop centres, radius, sampling) are in
+models/transformer/extra_variants.py and are run the same way, by name.
+
 The last two separate the crop's two roles. `no_crop` removes both the
 restriction on what a neuron attends to and the readout's knowledge of where
 the neuron is, so its drop alone does not say which of the two matters;
@@ -49,7 +52,8 @@ import torch
 from _common import (add_dataset_arg, add_device_arg, banner, cfg,
                      datasets_from, device_from)
 from cirf import data as dat
-from cirf.metrics import adjusted_r2_per_neuron, explained_variance_per_neuron
+from cirf.metrics import (adjusted_r2_per_neuron, cc_norm_per_neuron,
+                          explained_variance_per_neuron)
 from models.transformer import fit, get_cfg, save_checkpoint
 from models.transformer.variants import VARIANT_LABELS, build_variant, cnn_crop_cfg
 
@@ -62,13 +66,15 @@ def evaluate(model, ds, device):
     from cirf.evaluate import predict_torch
     y_pred = predict_torch(model, dat.images('test', ds), device)
     rep = dat.test_repeats(ds)
-    return explained_variance_per_neuron(y_pred, rep), adjusted_r2_per_neuron(y_pred, rep)
+    return (explained_variance_per_neuron(y_pred, rep),
+            adjusted_r2_per_neuron(y_pred, rep), cc_norm_per_neuron(y_pred, rep))
 
 
 def run_transformer_variant(name, conf, ds, device, fold, n_folds, seed, epochs):
     """Train one CiRF-ViT variant; returns (model, best val, epochs run, n_params)."""
     tr, vl, _ = dat.get_dataloaders(ds, batch_size=conf['BATCH_SIZE'],
                                     fold=fold, n_folds=n_folds)
+    conf = {**conf, 'RUN_FOLD': fold, 'RUN_SEED': seed, 'RUN_N_FOLDS': n_folds}
     model = build_variant(name, conf, ds, device)
     n_par = sum(p.numel() for p in model.parameters())
     best_val, hist, n_ep = fit(model, tr, vl, conf, device, epochs=epochs,
@@ -154,14 +160,18 @@ def main():
                         lambda *a: run_transformer_variant(name, *a)
                     model, best_val, epochs, n_par = runner(
                         conf, ds, device, fold, args.n_folds, seed, args.epochs)
-                    ev, adj = evaluate(model, ds, device)
+                    ev, adj, ccn = evaluate(model, ds, device)
+                    entry.setdefault('cc_norm', []).append(ccn.tolist())
+                    entry.setdefault('n_params', []).append(int(n_par))
+                    entry.setdefault('epochs', []).append(int(epochs))
+                    entry.setdefault('seconds', []).append(round(time.time() - t0, 1))
                     entry['ev'].append(ev.tolist())
                     entry['adj_r2'].append(adj.tolist())
                     entry['folds'].append(fold)
                     entry['seeds'].append(seed)
                     print(f'  {name:9s} fold {fold} seed {seed}  ep{epochs:3d}  '
                           f'val {best_val:.4f}  EV {ev.mean():.4f}  '
-                          f'adjR2 {adj.mean():.4f}  '
+                          f'adjR2 {adj.mean():.4f}  CCnorm {ccn.mean():.4f}  '
                           f'({n_par:,} par, {time.time() - t0:.0f}s)', flush=True)
                     out_path.write_text(json.dumps(store), encoding='utf-8')
 

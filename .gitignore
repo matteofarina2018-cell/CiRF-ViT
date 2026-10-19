@@ -17,3 +17,7 @@ checkpoints/
 .venv/
 .env
 .DS_Store
+
+# downloaded pretrained weights (and the V1T source they come with) and local wheels
+pretrained_weights/
+.wheels*/
